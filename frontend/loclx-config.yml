@@ -1,0 +1,6 @@
+dev:
+  type: http
+  to: :3000
+  subdomain: class-test
+  hostheader: class-test.tk
+  region: eu

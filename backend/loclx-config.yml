@@ -1,0 +1,6 @@
+dev:
+  type: http
+  to: :7000
+  subdomain: api-class-test
+  hostheader: api.class-test.tk
+  region: eu

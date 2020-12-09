@@ -1,0 +1,46 @@
+version: '3.8'
+# 3.1
+
+services:
+
+  backend:
+    build: 
+      context: "./backend"
+      args:
+        BACKEND_VERSION: ${BACKEND_VERSION}
+    restart: always
+    depends_on:
+      - db
+      # - redis
+    # environment:
+    #   MYSQL_PASSWORD: ${mariadb_password}  #????? koin.properties
+    #   MYSQL_DATABASE: ${mariadb_database}
+    ports:
+      - 127.0.0.1:7000:7000
+
+  frontend:
+    #image: nginx
+    build: ./frontend
+    restart: always
+    volumes:
+      - ./frontend/:/svelte-frontend
+      - ./dev/null:/svelte-frontend/node_modules
+    # environment:
+    # - APP_BACKEND_URL=backend:40001
+    # - APP_FRONTEND_PORT=40002
+
+  db:
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${mariadb_password}
+      MYSQL_DATABASE: ${mariadb_database}
+      TZ: Europe/Moscow
+    volumes:
+      - ${DB_PATH_HOST}:/var/lib/mysql
+    ports:
+        - 127.0.0.1:13306:3306 #dev
+
+  # redis:
+  #   image: "redis:alpine"
+  #   restart: always
