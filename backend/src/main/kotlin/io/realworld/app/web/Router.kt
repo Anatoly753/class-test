@@ -14,6 +14,7 @@ import org.koin.standalone.KoinComponent
 class Router(
     private val userController: UserController,
     private val testController: TestController,
+    private val resultController: ResultController,
     private val profileController: ProfileController,
     private val articleController: ArticleController,
     private val commentController: CommentController,
@@ -31,6 +32,9 @@ class Router(
             path("user") {
                 get(userController::getCurrent, roles(Roles.AUTHENTICATED))
                 put(userController::update, roles(Roles.AUTHENTICATED))
+                path("password") {
+                    put(userController::changePassword, roles(Roles.AUTHENTICATED))
+                }
             }
             path("tests") {
 //                get("feed", articleController::feed, roles(Roles.AUTHENTICATED))
@@ -48,8 +52,17 @@ class Router(
                     put(testController::update, roles(Roles.AUTHENTICATED))
                     delete(testController::delete, roles(Roles.AUTHENTICATED))
                 }
+                path("answers") { path(":id") { get(testController::getByIdWithAnswers, roles(Roles.AUTHENTICATED)) } }
+                path("check") { path(":id") { post(testController::testCheck, roles(Roles.AUTHENTICATED)) } }
                 path("search") { post(testController::search, rolesOptionalAuthenticated) }
                 post(testController::create, roles(Roles.AUTHENTICATED))
+            }
+
+            path("results") {
+                path(":id") {
+                    get(resultController::getById, rolesOptionalAuthenticated)
+                }
+                path("search") { post(resultController::search, rolesOptionalAuthenticated) }
             }
 
 //            path("profiles/:username") {

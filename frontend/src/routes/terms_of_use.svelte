@@ -1,5 +1,5 @@
 <script>
-  import PageTransition from "./../components/PageTransition.svelte";
+  import Page from "./../components/Page.svelte";
   import {
     Container,
     Button,
@@ -29,7 +29,7 @@
   <title>Условия импользования</title>
 </svelte:head>
 
-<PageTransition>
+<Page>
   <Container class="text-center" style="max-width:1400px;">
     <Card class="pa-4" style="background: #fefefe">
       <h4>Условия использования</h4>
@@ -39,4 +39,4 @@
         right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));" />
     </Card>
   </Container>
-</PageTransition>
+</Page>

@@ -29,7 +29,11 @@ export default {
       replace({
         "process.browser": true,
         "process.env.NODE_ENV": JSON.stringify(mode),
-        "APP.API": "http://192.168.1.77:7000/api",
+
+        "APP.debug": false,
+        "APP.URL": "https://class-test.tk",
+        // "APP.API": "http://192.168.1.77:7000/api",
+        "APP.API": "https://api.class-test.tk/api",
         // "APP.API": "https://api-class-test.eu.loclx.io/api",
       }),
       svelte({

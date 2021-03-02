@@ -26,18 +26,19 @@ internal object Users : LongIdTable() {
     val password: Column<String> = varchar("password", 150)
     val classNumber: Column<Int> = integer("classNumber")
     val classId: Column<Long?> = long("classId").nullable()
+    val userRole: Column<String> = varchar("userRole", 10)
 
     fun toDomain(row: ResultRow): User {
         return User(
-                id = row[Users.id].value,
-                email = row[Users.email],
-                name = row[Users.name],
-                surname = row[Users.surname],
-                patronymic = row[Users.patronymic],
-                password = row[Users.password],
-                classNumber = row[Users.classNumber],
-                classId = row[Users.classId],
-//                role = row[Users.role]
+            id = row[Users.id].value,
+            email = row[Users.email],
+            name = row[Users.name],
+            surname = row[Users.surname],
+            patronymic = row[Users.patronymic],
+            password = row[Users.password],
+            classNumber = row[Users.classNumber],
+            classId = row[Users.classId],
+            userRole = row[Users.userRole]
         )
     }
 }
@@ -55,21 +56,21 @@ class UserRepository(private val dataSource: DataSource) {
         }
     }
 
-    fun findByEmail(email: String): User? {
+    fun findById(id: Long): User? {
         return transaction(Database.connect(dataSource)) {
-            Users.select { Users.email eq email }
-                    .map { Users.toDomain(it) }
-                    .firstOrNull()
+            Users.select { Users.id eq id }
+                .map { Users.toDomain(it) }
+                .firstOrNull()
         }
     }
 
-//    fun findByUsername(username: String): User? {             //========= TO-DO: findBySNP(ФИО) ===========
-//        return transaction(Database.connect(dataSource)) {
-//            Users.select { Users.username eq username }
-//                    .map { Users.toDomain(it) }
-//                    .firstOrNull()
-//        }
-//    }
+    fun findByEmail(email: String): User? {
+        return transaction(Database.connect(dataSource)) {
+            Users.select { Users.email eq email }
+                .map { Users.toDomain(it) }
+                .firstOrNull()
+        }
+    }
 
     fun create(user: User): Long {
         val res = transaction(Database.connect(dataSource)) {
@@ -81,7 +82,7 @@ class UserRepository(private val dataSource: DataSource) {
                 row[Users.password] = user.password!!
                 row[Users.classNumber] = user.classNumber!!
                 row[Users.classId] = user.classId
-//                row[Users.role] = user.role
+                row[Users.userRole] = user.userRole!!
             }.value
         }
         println(res)
@@ -96,14 +97,12 @@ class UserRepository(private val dataSource: DataSource) {
                     row[Users.name] = user.name
                 if (user.surname != null)
                     row[Users.surname] = user.surname
-                if (user.patronymic != null)
+//                if (user.patronymic != null)
                     row[Users.patronymic] = user.patronymic
                 if (user.password != null)
                     row[Users.password] = user.password!!
                 if (user.classNumber != null)
                     row[Users.classNumber] = user.classNumber
-//                if (user.role != null)
-//                    row[Users.role] = user.role
             }
         }
         return findByEmail(user.email!!)

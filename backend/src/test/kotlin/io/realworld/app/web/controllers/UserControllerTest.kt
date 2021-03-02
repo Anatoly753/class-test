@@ -19,16 +19,16 @@ class UserControllerTest {
     private lateinit var app: Javalin
     private lateinit var http: HttpUtil
 
-    @Before
-    fun start() {
-        app = AppConfig().setup().start()
-        http = HttpUtil(app.port())
-    }
-
-    @After
-    fun stop() {
-        app.stop()
-    }
+//    @Before
+//    fun start() {
+//        app = AppConfig().setup().start()
+//        http = HttpUtil(app.port())
+//    }
+//
+//    @After
+//    fun stop() {
+//        app.stop()
+//    }
 
     @Test
     fun nameValid() {

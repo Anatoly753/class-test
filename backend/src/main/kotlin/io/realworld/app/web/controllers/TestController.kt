@@ -1,14 +1,28 @@
 package io.realworld.app.web.controllers
 
+import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.joda.JodaModule
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import io.javalin.http.Context
-import io.realworld.app.domain.TestDTO
-import io.realworld.app.domain.TestsDTO
-import io.realworld.app.domain.service.TestService
-import io.realworld.app.ext.isClassNumberValid
-import io.realworld.app.ext.isIdValid
+import io.realworld.app.domain.*
+import io.realworld.app.domain.service.*
+import io.realworld.app.ext.*
 import org.jetbrains.exposed.sql.SortOrder
+import org.joda.time.DateTime
+import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.HashMap
 
-class TestController(private val testService: TestService) {
+
+class TestController(
+    private val testService: TestService,
+    private val userService: UserService,
+    private val resultService: ResultService
+) {
 
 //    fun findBy(ctx: Context) {
 //        val tag = ctx.queryParam("tag")
@@ -39,6 +53,8 @@ class TestController(private val testService: TestService) {
 //                }
 //    }
 
+    val mapper = ObjectMapper().registerKotlinModule()
+
     fun create(ctx: Context) {
         ctx.bodyValidator<TestDTO>()
             .check({ !it.test?.title.isNullOrBlank() })
@@ -58,7 +74,33 @@ class TestController(private val testService: TestService) {
         ctx.pathParam<Long>("id")
             .check({ it.isIdValid() })
             .get().also { id ->
+                println(id)
                 testService.findById(id).apply {
+                    if (this.answers != null) {
+                        val answers: List<List<AnswerDTO?>?> = mapper.readValue(this.answers)
+                        answers.forEach {
+                            it?.forEach { answerDTO ->
+                                if (answerDTO != null) {
+                                    answerDTO.score = 0
+                                    answerDTO.right = false
+                                    println("${answerDTO.score}; ${answerDTO.right}")
+                                }
+                            }
+                        }
+
+                    }
+
+                    ctx.json(TestDTO(this.copy(answers = mapper.writeValueAsString(answers))))
+
+                }
+            }
+    }
+
+    fun getByIdWithAnswers(ctx: Context) {
+        ctx.pathParam<Long>("id")
+            .check({ it.isIdValid() })
+            .get().also { id ->
+                testService.findByIdWithAnswers(ctx.attribute("email"), id).apply {
                     ctx.json(TestDTO(this))
                 }
             }
@@ -74,10 +116,11 @@ class TestController(private val testService: TestService) {
 //            .check({ !it.test?.settings.isNullOrBlank() })
             .get().test?.also { test ->
                 val sort = SortOrder.valueOf(ctx.queryParam("sort", "DESC")!!) //SortOrder.DESC
-                val limit = ctx.queryParam("limit", "-1")!!.toInt()
-                val offset = ctx.queryParam("offset", "-1")!!.toInt()
-                testService.search(test, sort, limit, offset).apply {
-                    ctx.json(this.let { TestsDTO(it, it.size) })
+                val limit = ctx.queryParam("limit", "20")!!.toInt()
+                val offset = ctx.queryParam("offset", "0")!!.toInt()
+                testService.search(test, limit, offset).apply {
+                    ctx.result(this)
+                    //ctx.json(this.let { TestsDTO(it, it.size) })
                 }
             }
     }
@@ -87,7 +130,7 @@ class TestController(private val testService: TestService) {
         ctx.bodyValidator<TestDTO>()
 //            .check({ !it.test?.questions.isNullOrBlank() }) //FIXME: can be null OR validJSON
             .get().test?.also { test ->
-                testService.update(id, test).apply {
+                testService.update(ctx.attribute("email"), id, test).apply {
                     ctx.json(TestDTO(this))
                 }
             }
@@ -95,8 +138,67 @@ class TestController(private val testService: TestService) {
 
     fun delete(ctx: Context) {
         ctx.pathParam<String>("id").get().toLong().also { id ->
-            testService.delete(id)
+            testService.delete(ctx.attribute("email"), id)
         }
+    }
+
+    fun testCheck(ctx: Context) {
+
+        val id = ctx.pathParam<String>("id").get().toLong()
+
+        var score = 0
+        var maxScore = 0
+
+//        ctx.bodyValidator<List<List<AnswerDTO>>>()
+//            .get().also { userAnswers ->
+        val userAnswers: List<List<Answer?>?> = mapper.readValue(ctx.body())
+        println(userAnswers[0]?.get(0)?.answer)
+
+        val user = userService.getByEmail(ctx.attribute<String>("email"))
+
+        val test = testService.findById(id).apply {
+            if (this.answers != null && this.settings != null) {
+//                val typeRef: TypeReference<HashMap<String?, String?>?> =
+//                    object : TypeReference<HashMap<String?, String?>?>() {}
+//                val settingsMap: HashMap<String?, String?>? = mapper.readValue(this.settings, typeRef)
+                maxScore = JSONObject(this.settings).getJSONObject("test").getInt("maxScore")
+                println(maxScore)
+                val testAnswers: List<List<AnswerDTO?>?> = mapper.readValue(this.answers)
+
+//         result depends on settings(show right answers)
+
+                userAnswers.forEachIndexed { index, user_answer ->
+                    user_answer?.forEach { answerDTO ->
+                        println(answerDTO)
+
+                        if (answerDTO != null) {
+                            testAnswers[index]?.forEach { test_answer ->
+//                                println("user: ${answerDTO.answer}; test: ${test_answer?.answer}; score: ${test_answer?.score};;; ${answerDTO.answer == test_answer?.answer}")
+                                if (answerDTO.answer.toString() == test_answer?.answer.toString()) score += test_answer?.score!!
+                            }
+                        }
+
+                    }
+
+                }
+
+//                ctx.json(TestDTO(this.copy(answers = mapper.writeValueAsString(answers))))
+
+            }
+        }
+
+//        private val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
+//        private val mapper: ObjectMapper = jacksonObjectMapper()
+//            .registerModule(JodaModule())
+//            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+//            .configure(SerializationFeature.WRITE_DATES_WITH_ZONE_ID, true)
+//            .setDateFormat(dateFormat)
+
+        val result = Result(null, user, test, score, maxScore, mapper.writeValueAsString(userAnswers), DateTime())
+
+        ctx.json(resultService.create(result))
+//        ctx.json(result)
+
     }
 
 //    fun favorite(ctx: Context) {

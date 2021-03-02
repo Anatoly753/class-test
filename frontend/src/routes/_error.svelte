@@ -1,5 +1,5 @@
 <script>
-  import PageTransition from "./../components/PageTransition.svelte";
+  import Page from "./../components/Page.svelte";
   import { mdiHome, mdiRefresh } from "@mdi/js";
   import { Container, Button, Icon, Card } from "svelte-materialify/src";
   import { goto } from "@sapper/app";
@@ -14,7 +14,7 @@
   <title>{status}</title>
 </svelte:head>
 
-<PageTransition>
+<Page>
   <Container class="text-center" style="max-width:700px;">
     <Card class="pa-4" style="background: #fefefe">
       <h4>Ошибка {status}</h4>
@@ -58,7 +58,7 @@
       {/if}
     </Card>
   </Container>
-</PageTransition>
+</Page>
 
 <style>
   img {

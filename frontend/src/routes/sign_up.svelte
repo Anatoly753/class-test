@@ -1,5 +1,5 @@
 <script>
-  import PageTransition from "./../components/PageTransition.svelte";
+  import Page from "./../components/Page.svelte";
   import {
     Container,
     Button,
@@ -145,7 +145,15 @@
 
     if (!personalData) personalDataWarning = true;
 
-    if (emailError || passwordError || !termsOfUse || !personalData) {
+    if (
+      emailError ||
+      passwordError ||
+      nameError ||
+      surnameError ||
+      patronymicError ||
+      !termsOfUse ||
+      !personalData
+    ) {
       disabled = false;
       return;
     }
@@ -193,7 +201,7 @@
   <title>Регистрация</title>
 </svelte:head>
 
-<PageTransition>
+<Page>
   <Container class="text-center" style="max-width:600px;">
     <Card class="pa-4" style="background: #fefefe">
       <h4>Регистрация</h4>
@@ -451,4 +459,4 @@
       </ul>
     </Alert>
   </Overlay>
-</PageTransition>
+</Page>

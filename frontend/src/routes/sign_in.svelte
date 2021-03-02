@@ -1,5 +1,5 @@
 <script>
-  import PageTransition from "./../components/PageTransition.svelte";
+  import Page from "../components/Page.svelte";
   import {
     Container,
     Button,
@@ -126,7 +126,7 @@
   <title>Вход</title>
 </svelte:head>
 
-<PageTransition>
+<Page>
   <Container class="text-center" style="max-width:600px;">
     <Card class="pa-4" style="background: #fefefe">
       <h4>Вход</h4>
@@ -244,4 +244,4 @@
       </ul>
     </Alert>
   </Overlay>
-</PageTransition>
+</Page>

@@ -15,13 +15,14 @@ import org.joda.time.DateTimeZone
 import org.joda.time.format.DateTimeFormat
 import org.joda.time.format.DateTimeFormatter
 
-private object Tests : LongIdTable() {
+object Tests : LongIdTable() {
     //DELETE    override val id: Column<EntityID<Long>> = long("id").autoIncrement().primaryKey().entityId()
     val title: Column<String> = varchar("title", 150)
     val description: Column<String?> = varchar("description", 255).nullable()
     val subject: Column<String> = varchar("subject", 20)
     val classNumber: Column<Int> = integer("classNumber")
     val questions: Column<String?> = text("questions").nullable() //JSON
+    val answers: Column<String?> = text("answers").nullable() //JSON
     val settings: Column<String?> = text("settings").nullable() //JSON
     val createdAt: Column<DateTime> = datetime("created_at")
     val author: Column<Long> = long("author")
@@ -37,6 +38,7 @@ private object Tests : LongIdTable() {
             subject = row[subject],
             classNumber = row[classNumber],
             questions = row[questions]!!,
+            answers = row[answers]!!,
             settings = row[settings]!!,
             createdAt = row[createdAt],
             author = author
@@ -113,6 +115,7 @@ class TestRepository(private val dataSource: DataSource) {
                 row[subject] = test.subject!!
                 row[classNumber] = test.classNumber!!
                 row[questions] = test.questions
+                row[answers] = test.answers
                 row[settings] = test.settings
                 row[createdAt] = date
                 row[author] = test.author?.id!!
@@ -193,7 +196,7 @@ class TestRepository(private val dataSource: DataSource) {
             test?.author?.id?.let {
                 query.andWhere { Tests.author eq it }
             }
-            if (limit > -1 || offset > -1) query.limit(limit, offset)
+//            if (limit > -1 || offset > -1) query.limit(limit, offset)
             query.orderBy(Tests.id to sort) //createdAt
             query.map { row -> Tests.toDomain(row, Users.toDomain(row)) }
         }
@@ -260,6 +263,8 @@ class TestRepository(private val dataSource: DataSource) {
                     row[Tests.classNumber] = test.classNumber
                 if (test.questions != null)
                     row[questions] = test.questions
+                if (test.answers != null)
+                    row[answers] = test.answers
                 if (test.settings != null)
                     row[settings] = test.settings
             }

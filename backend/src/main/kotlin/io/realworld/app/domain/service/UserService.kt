@@ -19,10 +19,17 @@ class UserService(private val jwtProvider: JwtProvider, private val userReposito
 
     fun create(user: User): User {
         userRepository.findByEmail(user.email!!).takeIf { it != null }?.apply {
-            throw HttpResponseException(HttpStatus.BAD_REQUEST_400,
-                    "Email already registered!")
+            throw HttpResponseException(
+                HttpStatus.BAD_REQUEST_400,
+                "Этот e-mail уже занят!"
+            )
         }
-        userRepository.create(user.copy(password = String(base64Encoder.encode(Cipher.encrypt(user.password)))))
+        userRepository.create(
+            user.copy(
+                password = String(base64Encoder.encode(Cipher.encrypt(user.password))),
+                userRole = "student"
+            )
+        )
         return user.copy(token = generateJwtToken(user))
     }
 
@@ -31,7 +38,7 @@ class UserService(private val jwtProvider: JwtProvider, private val userReposito
         if (userFound?.password == String(base64Encoder.encode(Cipher.encrypt(user.password)))) {
             return userFound.copy(token = generateJwtToken(userFound))
         }
-        throw UnauthorizedResponse("email or password invalid!")
+        throw UnauthorizedResponse("Вы ввели неверный e-mail или пароль!")
     }
 
     fun getByEmail(email: String?): User {

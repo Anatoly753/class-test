@@ -1,5 +1,5 @@
 <script>
-  import PageTransition from "../../components/PageTransition.svelte";
+  import Page from "../../components/Page.svelte";
   import SubjectCard from "./../../components/SubjectCard.svelte";
   import { Container, Card } from "svelte-materialify/src";
   import { mdiAt } from "@mdi/js";
@@ -24,7 +24,7 @@
   <title>Тесты</title>
 </svelte:head>
 
-<PageTransition>
+<Page>
   <Container style="max-width:1600px;">
     <Card class="pa-4">
       <h4 class="text-center">Тесты</h4>
@@ -34,7 +34,7 @@
         right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));" />
 
       <div class="d-flex flex-wrap align-content-stretch justify-center">
-        {#each subjects as subject}
+        {#each subjects as subject, i}
           <!-- <div class="white black-text pa-2 ma-1">Flex Item</div> -->
           <SubjectCard
             name={subject.name}
@@ -44,4 +44,4 @@
       </div>
     </Card>
   </Container>
-</PageTransition>
+</Page>

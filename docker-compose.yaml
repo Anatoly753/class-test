@@ -1,10 +1,9 @@
-version: '3.8'
+version: "3.8"
 # 3.1
 
 services:
-
   backend:
-    build: 
+    build:
       context: "./backend"
       args:
         BACKEND_VERSION: ${BACKEND_VERSION}
@@ -39,7 +38,18 @@ services:
     volumes:
       - ${DB_PATH_HOST}:/var/lib/mysql
     ports:
-        - 127.0.0.1:13306:3306 #dev
+      - 127.0.0.1:13306:3306 #dev
+
+  meili:
+    image: getmeili/meilisearch
+    restart: always
+    volumes:
+      - ${MEILI_PATH_HOST}:/data.ms
+    ports:
+      - 127.0.0.1:7700:7700
+    environment:
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
+      MEILI_ENV: ${MEILI_ENV}
 
   # redis:
   #   image: "redis:alpine"

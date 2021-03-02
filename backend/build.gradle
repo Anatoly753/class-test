@@ -62,6 +62,9 @@ dependencies {
     implementation "org.webjars:swagger-ui:$swagger_version"
     implementation "io.swagger.core.v3:swagger-core:$swagger_core_version"
 
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+//    implementation 'com.meilisearch.sdk:meilisearch-java:0.1.1'
+
     testImplementation "junit:junit:$junit_version"
     testImplementation "com.mashape.unirest:unirest-java:$unirest_version"
 }
